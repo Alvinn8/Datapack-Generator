@@ -1,0 +1,1048 @@
+<html>
+  <head>
+
+  <script src="lib/jszip.min.js" type="text/javascript"></script>
+  <script src="lib/FileSaver.js" type="text/javascript"></script>
+
+  <title>Datapack generator</title>
+
+  <style>
+    #files textarea, #deleted textarea {
+      font-size: large;
+      width:90%;
+      height:80%;
+      display:none;
+      white-space:nowrap;
+    }
+    .file {
+      border: none;
+      height: 100px;
+      width: 101px;
+      outline: 0;
+    }
+    .headerButton {
+      border: 1px solid black;
+      padding:0px;
+    }
+    .error {
+      color: red;
+    }
+    #contextmenu p {
+      font-family: Arial;
+      margin: 0px;
+      margin-left: -10px;
+      padding-left: 14px;
+      width: 116%;
+      height: 20px;
+      cursor: default;
+    }
+    #contextmenu p:not(.disabled):hover {
+      background-color: rgb(60,133,254);
+      color: white;
+    }
+    #contextmenu p.disabled {
+      color: #ccc;
+    }
+    #contextmenu {
+      background-color: rgb(246,246,246);
+      border: 1px solid rgb(165,165,165);
+      border-radius: 10px;
+      padding: 5px;
+      padding-left: 10px;
+      position: absolute;
+      padding-right: 15px;
+      box-shadow: 1px 1px 5px 0px rgba(128, 128, 128, 0.5);
+      opacity: 0;
+    }
+    #contextmenu:hover {
+      transition: opacity 0.2s ease;
+    }
+    #find {
+      position: fixed;
+      left: 20%;
+      top: 20%;
+      width: 60%;
+      height: 60%;
+      background-color: #f5f5f5;
+      box-shadow: 0px 0px 5px rgba(100,100,100,0.5);
+      display: none;
+    }
+    #find #top {
+      width: 100%;
+      height: 30px;
+      padding-top: 5px;
+      background-color: #fdfdfd;
+      border-bottom: 1px solid gray;
+    }
+    #find #top #exit {
+      width: 16px;
+      height: 16px;
+      border-radius: 50px;
+      background-color: rgb(254,98,93);
+      padding: 0px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+    #find #top p {
+      text-align: center;
+      margin-top: -13px;
+      font-family: Roboto, Arial;
+    }
+    #find form {
+      padding: 10px;
+    }
+    .findselect {
+      border-bottom: 2px solid #ccc;
+      border-right: 2px solid #ccc;
+      border-bottom-right-radius: 5px;
+      padding: 5px;
+      background-color: white;
+      border-top-left-radius: 5px;
+    }
+    label {
+      font-family: Roboto, Arial;
+    }
+    #find #findbody #status {
+      width: 99%;
+      background-color: lime;
+      padding: 10px;
+      padding-right: 0px;
+      border-radius: 9px;
+      margin-top: 20px;
+      display: none;
+      height: 110px;
+      overflow: scroll;
+    }
+    #find #findbody .find {
+      font-size: large;
+      width: 400px;
+      padding: 10px;
+    }
+    #find #findbody button {
+      font-size: large;
+      background-color: white;
+      border-radius: 5px;
+      border: 1px solid black;
+      cursor: pointer;
+    }
+    #find form input[type="radio"], #find form label, #find #findbody input[type="checkbox"], #find #findbody label {
+      cursor: pointer;
+    }
+    #find #findbody {
+      padding: 8px;
+    }
+  </style>
+
+  <script>
+
+    var datapackName = "example datapack";
+
+    var directory;
+
+    function displayFile(path, del) {
+
+      document.getElementById('newFile').setAttribute('dir', path);
+
+      document.getElementById('dir').style.paddingBottom = null;
+
+      var files = document.getElementById('files').children;
+
+      document.getElementById('dir').innerHTML = "";
+
+      displayDir(path, del);
+
+      for (var i = 0; i < files.length; i++) {
+
+        files[i].removeAttribute('style');
+
+      }
+
+      document.getElementById(path).style.display = "block";
+
+    }
+
+    function downloadDatapack() {
+
+      var files = document.getElementById('files').children;
+
+      var zip = new JSZip();
+
+      for (var i = 0; i < files.length; i++) {
+
+        var split = files[i].id.split('/').slice(1);
+
+        if (split.length < 1) return "Error";
+
+        var path = zip;
+
+        for (var j = 0; j < split.length-1; j++) {
+
+          path = path.folder(split[j]);
+
+        }
+
+        if (files[i].tagName == "TEXTAREA") {
+
+          path.file(split[split.length-1], files[i].value);
+
+        }
+
+      }
+
+      zip.generateAsync({type:"blob"}).then(function(content) {
+
+          saveAs(content, datapackName +".zip");
+
+      });
+
+    }
+
+    function displayFolder(dir, del) {
+
+      if (!(dir.endsWith('/'))) dir += "/";
+
+      document.getElementById('newFile').setAttribute('dir', dir);
+
+      document.getElementById('dir').style.paddingBottom = "100%";
+
+      var dirDiv = document.getElementById('dir');
+
+      var files = document.getElementById('files').children;
+
+      if (del) files = document.getElementById('deleted').children;
+
+      dirDiv.innerHTML = "";
+
+      displayDir(dir, del);
+
+      for (var i = 0; i < files.length; i++) {
+
+        files[i].removeAttribute('style');
+
+      }
+
+      var used = {};
+
+      for (var i = 0; i < files.length; i++) {
+
+        if (files[i].id.startsWith(dir)) {
+
+          var str = files[i].id.substr(dir.length);
+
+          if (str.startsWith('/')) str = str.substr(1);
+
+          var f = str.split('/')[0];
+
+          if (used[f]) continue;
+          else used[f] = true;
+
+          if (f.includes('.')) {
+
+            var toAdd = document.createElement('button');
+
+            toAdd.className = "file";
+            toAdd.innerHTML = "<img src=\"img/unknown-file.png\"><p style=\"word-break:break-all;margin:0;margin-top:5px;\">"+ str.split('/')[0] +"</p>";
+            //toAdd.setAttribute('oncontextmenu','ct(event,1,this)');
+
+            if (f.endsWith('.mcfunction')) toAdd.firstChild.src="img/mcfunction-64.png";
+
+            if (files[i].id == "datapack/data/minecraft/tags/functions/tick.json") toAdd.firstChild.src="img/repeating.png";
+            if (files[i].id == "datapack/data/minecraft/tags/functions/load.json") toAdd.firstChild.src="img/mcfunction-64.png";
+
+            var b = files[i].id.substr(0,dir.length);
+
+            if (!(b.endsWith('/'))) b += "/";
+
+            if (del) {
+
+              toAdd.setAttribute('onclick', "displayFile('"+ b + str.split('/')[0] +"',true)");
+
+            } else {
+
+              toAdd.setAttribute('onclick', "displayFile('"+ b + str.split('/')[0] +"')")
+
+            }
+
+            dirDiv.appendChild(toAdd);
+
+          } else {
+
+            var toAdd = document.createElement('button');
+
+            toAdd.className = "file";
+            toAdd.innerHTML = "<img src=\"img/folder-hd.png\" width=\"64\" height=\"64\"><p style=\"word-break:break-all;margin:0;margin-top:5px;\">"+ str.split('/')[0] +"</p>";
+            //toAdd.setAttribute('oncontextmenu','ct(event,1,this)');
+
+            var b = files[i].id.substr(0,dir.length);
+
+            if (!(b.endsWith('/'))) b += "/";
+
+            if (del) {
+
+              toAdd.setAttribute('onclick', "displayFolder('"+ b + str.split('/')[0] +"',true)");
+
+            } else {
+
+              toAdd.setAttribute('onclick', "displayFolder('"+ b + str.split('/')[0] +"')");
+
+            }
+
+            dirDiv.appendChild(toAdd);
+
+          }
+
+        }
+
+      }
+
+    }
+
+    function displayDir(dir,del) {
+
+      if (dir.endsWith('/')) dir = dir.slice(0,-1);
+
+      var split = dir.split('/');
+
+      var html = "";
+
+      var path = "";
+
+      var newFile = document.getElementById('newFile');
+
+      for (var i = 0; i < split.length; i++) {
+
+        path += split[i] + "/";
+
+        if (!(split[i].includes('.'))) {
+
+          if (del) {
+
+            html += split[i].link('javascript:displayFolder("'+ path +'",true)') + " / ";
+
+          } else {
+
+            html += split[i].link('javascript:displayFolder("'+ path +'")') + " / ";
+
+          }
+
+        } else {
+
+          html += split[i].link('javascript:void(0)');
+
+        }
+
+      }
+
+      var toAdd = document.createElement('p');
+
+      toAdd.innerHTML = html;
+
+      document.getElementById('dir').appendChild(toAdd);
+
+      var newFile = document.getElementById('newFile');
+      var newFolder = document.getElementById('newFolder');
+
+      if (html.endsWith(' / ')) {
+
+        newFile.style.opacity = 1;
+        newFile.setAttribute("onclick", "newFile()");
+
+        newFolder.style.opacity = 1;
+        newFolder.setAttribute("onclick", "newFolder()");
+
+      } else {
+
+        newFile.style.opacity = 0.2;
+        newFile.removeAttribute('onclick');
+
+        newFolder.style.opacity = 0.2;
+        newFolder.removeAttribute('onclick');
+
+      }
+
+    }
+
+    function newFile() {
+
+      var dir = document.getElementById('newFile').getAttribute('dir');
+
+      if (dir == undefined) return;
+
+      if (dir.endsWith('/')) dir = dir.slice(0,-1);
+
+      var fileName = prompt('Enter file name');
+
+      if (!fileName) return;
+
+      if (!(fileName.includes('.'))) {
+
+        alert('The file needs the contain a \'.\' Example: \'main.mcfunction\'')
+        return;
+
+      }
+
+      var t = document.getElementById(dir);
+
+      if (t) if (t.tagName == "F") t.remove();
+
+      var toAdd = document.createElement('textarea');
+
+      if (!(dir.startsWith('/'))) dir += "/";
+
+      toAdd.id = dir + fileName;
+
+      document.getElementById('files').appendChild(toAdd);
+
+      displayFolder(dir);
+
+    }
+
+    function newFolder() {
+
+      var dir = document.getElementById('newFile').getAttribute('dir');
+
+      if (!(dir.endsWith('/'))) dir += "/";
+
+      var foldername = prompt('Enter folder name');
+
+      if (!foldername) return;
+
+      if (foldername.includes('.')) {
+
+        alert('The folder name can not contain a \'.\'');
+        return;
+
+      }
+
+
+      var toAdd = document.createElement('f');
+
+      toAdd.id = dir + foldername;
+
+      document.getElementById('files').appendChild(toAdd);
+
+
+      var t = document.getElementById(dir.slice(0,-1));
+
+      if (t) if (t.tagName == "F") t.remove();
+
+      displayFolder(dir);
+
+    }
+
+    function load() {
+
+      document.onclick = function(e) {
+
+        var cm = document.getElementById('contextmenu').style;
+
+        if (cm.display != "none") {
+
+          var clickedElem = document.elementFromPoint(e.clientX,e.clientY)
+
+          if (clickedElem.tagName == "P") clickedElem = clickedElem.parentNode;
+
+          if (!(clickedElem.id == "contextmenu")) cct();
+
+        }
+
+      }
+
+      window.addEventListener('beforeunload', function(){return "You sure?";});
+
+      document.onkeydown = function(e) {
+
+        if ((e.keyCode == 70) && (e.metaKey || e.ctrlKey)) {
+
+          e.preventDefault();
+
+          // The current directory is stored in an attribute in the newFile button because this is coded like shit...
+          if (document.getElementById('newFile').getAttribute('dir').endsWith('/')) {
+
+            document.getElementById('find').style.display = "block";
+            document.getElementById('this').checked = false;
+            document.getElementById('all').checked = true;
+            document.getElementById('this').parentNode.style.opacity = 0.2;
+            document.getElementById('this').setAttribute('disabled','disabled');
+
+          } else {
+
+            document.getElementById('find').style.display = "block";
+            document.getElementById('this').checked = true;
+            document.getElementById('all').checked = false;
+            document.getElementById('this').parentNode.removeAttribute('style');
+            document.getElementById('this').removeAttribute('disabled');
+
+          }
+
+        }
+
+      }
+
+    }
+
+    function ct(e) {
+
+      var c = document.getElementById('contextmenu').style;
+
+      c.left = e.clientX;
+      c.top = e.clientY;
+      c.opacity = 1;
+      c.transition = null;
+
+      e.preventDefault();
+
+      
+
+      var d = document.elementFromPoint(e.clientX,e.clientY)
+
+
+
+      if ((d.className == "file") || (d.parentNode.className == "file")) { // Clicked on a file
+
+
+        if (d.parentNode.className == "file") d = d.parentNode;
+
+        var cm = document.getElementById('contextmenu');
+
+        var dir = d.getAttribute('onclick').substr(13);
+
+        var extra = "";
+
+        if (d.getAttribute('onclick').startsWith('displayFile')) {
+
+          dir = d.getAttribute('onclick').substr(11);
+
+        }
+
+        if (dir.startsWith('(\'deleted/')) {
+
+          var cDir = document.getElementById('newFile').getAttribute('dir');
+
+          if (cDir == 'deleted/') {
+
+            console.log(dir);
+            console.log(dir.replace("true", "\"delFully\""));
+
+            cm.innerHTML = "<p style=\"width:113%\" onclick=\"cct();putBack"+ dir +"\">Put back</p><p style=\"width:113%\" onclick=\"cct();putBack"+ dir.replace("true", "\'delFully\'") +"\">Delete fully</p>";
+
+          } else {
+
+            cm.innerHTML = "<p style=\"width:113%\" class=\"deleted\">Delete fully</p>";
+
+          }
+
+        } else if (dir.endsWith('.mcfunction\')')) {
+
+          var split = dir.split('/');
+
+          var mcdir = split[2] + ":" + split[split.length-1].slice(0,-13);
+
+          var tickjson = "<p onclick=\"addFunctionTag('tick.json','"+ mcdir +"');cct()\" style=\"width:109.5%\">Add to tick.json</p>";
+          var loadjson = "<p onclick=\"addFunctionTag('load.json','"+ mcdir +"');cct()\" style=\"width:109.5%\">Add to load.json</p>";
+
+          if (document.getElementById('datapack/data/minecraft/tags/functions/tick.json')) {
+
+            if (document.getElementById('datapack/data/minecraft/tags/functions/tick.json').value.includes(mcdir)) {
+
+              tickjson = tickjson.substr(0,3) + "class=\"disabled\"" + tickjson.substr(49 + mcdir.length);
+
+            }
+
+          }
+
+          if (document.getElementById('datapack/data/minecraft/tags/functions/load.json')) {
+
+            if (document.getElementById('datapack/data/minecraft/tags/functions/load.json').value.includes(mcdir)) {
+
+              loadjson = loadjson.substr(0,3) + "class=\"disabled\"" + loadjson.substr(49 + mcdir.length);
+
+            }
+
+          }
+
+          cm.innerHTML = "<p onclick=\""+ d.getAttribute('onclick') +";cct()\" style=\"width:109.5%\">Open</p><p onclick=\"cct();rename"+ dir +"\" style=\"width:109.5%\">Rename</p><p onclick=\"cct();del"+ dir +"\" style=\"width:109.5%\">Delete</p>"+ tickjson + loadjson;
+
+        } else {
+
+          cm.innerHTML = "<p onclick=\""+ d.getAttribute('onclick') +";cct()\">Open</p><p onclick=\"cct();rename"+ dir +"\">Rename</p><p onclick=\"cct();del"+ dir +"\">Delete</p>"; 
+
+        }
+
+
+
+      } else { // Click on the background
+
+        var cm = document.getElementById('contextmenu');
+
+        cm.innerHTML = "<p onclick=\"newFile();cct();\" style=\"width:113%\">New File</p style=\"width:113%\"><p onclick=\"newFolder();cct();\" style=\"width:113%\">New Folder</p>";
+
+      }
+
+    }
+
+    function cct() { // Close context menu
+
+      var c = document.getElementById('contextmenu');
+
+      c.style.transition = "opacity 0.2s linear";
+      c.style.opacity = 0;
+      c.addEventListener('transitionend', function(event){
+
+        document.getElementById('contextmenu').style.top = "-200px";
+
+      });
+
+    }
+
+    function rename(dir) {
+
+      var newName = prompt('Enter new name');
+
+      if (!newName) return;
+
+      if (dir.includes('.')) {
+
+        if (!(newName.includes('.'))) {
+
+          alert("The file name needs to contain a '.' Example: 'main.mcfunction'");
+          return;
+
+        }
+
+      } else {
+
+        if (newName.includes('.')) {
+
+          alert("The folder name can not contain a '.'");
+          return;
+
+        }
+
+      }
+
+      var files = document.getElementById('files').children;
+
+      for (var i = 0; i < files.length; i++) {
+
+        if (files[i].id.startsWith(dir)) {
+
+          var split = files[i].id.split('/');
+
+          var before = files[i].id.substr(0,dir.length - dir.split('/')[dir.split('/').length-1].length);
+
+          var after = files[i].id.substr(dir.length);
+
+          files[i].id = before + newName + after;
+
+          console.log(files[i].id);
+
+        }
+
+      }
+
+      displayFolder(document.getElementById('newFile').getAttribute('dir'));
+
+    }
+
+    function del(dir) {
+
+      var files = document.getElementById('files').children;
+
+      var delIcon = true;
+
+      for (var i = 0; i < files.length; i++) {
+
+        if (files[i].id.startsWith(dir)) {
+
+          files[i].setAttribute('delDir',files[i].id);
+
+          var split = dir.split('/');
+
+          files[i].id = "deleted/"+ files[i].id.substr(dir.slice(0,-(split[split.length-1].length)).length);
+          document.getElementById('deleted').appendChild(files[i]);
+
+          i--;
+
+          if (delIcon) {
+
+            var delIconn = document.getElementById('delIcon');
+            delIconn.style.opacity = 1;
+            delIconn.setAttribute('onclick','displayFolder(\'deleted/\',true)');
+            delIcon = false;
+
+          }
+
+        }
+
+      }
+
+      displayFolder(document.getElementById('newFile').getAttribute('dir'));
+
+    }
+
+    function cttext(e) {
+
+      var point = document.elementFromPoint(e.clientX,e.clientY);
+
+      if (point.tagName == "TEXTAREA") {
+
+        var sel = point.value.substring(point.selectionStart,point.selectionEnd);
+
+        var selbefore = point.value.substr(0,point.selectionEnd);
+
+        var split = selbefore.split(' ');
+
+        if ((split[split.length-2].endsWith("function"))) {
+
+          var f = split[split.length-1];
+
+          var lastchar = point.value.substr(point.selectionEnd+1);
+
+          if (!((lastchar.startsWith('\n')) || ((lastchar == '')))) {
+
+            f += point.value.substr(point.selectionEnd).split('\n')[0];
+
+          }
+
+          var split = f.split(':');
+
+          var dir = "datapack/data/" + split[0] + "/functions/"+ split[1] + ".mcfunction";
+
+          e.preventDefault();
+
+          var c = document.getElementById('contextmenu');
+
+          c.style.left = e.clientX + "px";
+          c.style.top = e.clientY + "px";
+          c.style.opacity = 1;
+          c.style.transition = null;
+
+          if (document.getElementById(dir)) {
+
+            c.innerHTML = "<p style=\"width:107.5%\" onclick=\"displayFile('"+ dir +"');cct()\">Open mcfunction file</p>";
+
+          } else {
+
+            c.innerHTML = "<p style=\"width:107%\" onclick=\"var toAdd = document.createElement('textarea');toAdd.id = '"+ dir +"';document.getElementById('files').appendChild(toAdd);displayFile('"+ dir +"');cct()\">Create mcfunction file</p>";
+
+          }
+
+        }
+
+      }
+
+    }
+
+    function addFunctionTag(file,dir) {
+
+      var tick = document.getElementById('datapack/data/minecraft/tags/functions/'+ file);
+
+     if (tick) {
+
+       tick.value = tick.value.slice(0,-8) + ",\n        \""+ dir +"\"\n    ]\n}";
+
+     } else {
+
+       var toAdd = document.createElement('textarea');
+
+       toAdd.id = "datapack/data/minecraft/tags/functions/"+ file;
+       toAdd.value = "{\n    \"values\":[\n        \""+ dir +"\"\n    ]\n}";
+
+       document.getElementById('files').appendChild(toAdd);
+
+     }
+
+    }
+
+    function putBack(dir, delFully) {
+
+      var files = document.getElementById('deleted').children;
+
+      for (var i = 0; i < files.length; i++) {
+
+        if (files[i].id.startsWith(dir)) {
+
+          files[i].id = files[i].getAttribute('delDir');
+          files[i].removeAttribute('delDir');
+
+          if (delFully == "delFully") {
+
+            files[i].remove();
+
+          } else {
+
+            document.getElementById('files').appendChild(files[i]);
+
+          }
+
+          i--;
+
+        }
+
+      }
+
+      if (files.length == 0) {
+
+        if (document.getElementById('deleted').children.length <= 0) {
+
+          var delIcon = document.getElementById('delIcon');
+
+          delIcon.style.opacity = 0.2;
+          delIcon.removeAttribute('onclick');
+
+        }
+
+      }
+
+      displayFolder(document.getElementById('newFile').getAttribute('dir'));
+
+    }
+
+    function handleFile(f) {
+
+      if (!(f.name.endsWith('zip'))) {
+
+        alert('The file you selected isn\'t a zip file!');
+        return;
+
+      } else {
+
+        if (!(confirm('Are you sure that you want to load '+ f.name + '? This will replace all other files currently in the project'))) return;
+        else {
+
+          document.getElementById('files').innerHTML = null;
+          datapackName = f.name.slice(0,-4);
+
+        }
+
+      }
+
+
+      JSZip.loadAsync(f).then(function(c) {
+
+        c.forEach(function(path, curFile){
+
+          if (!(curFile.dir)) {
+
+            curFile.async("text").then(function(txt) {
+
+              console.log(txt);
+
+              var toAdd = document.createElement('textarea');
+
+              toAdd.id = "datapack/"+ curFile.name;
+              toAdd.value = txt;
+
+              document.getElementById('files').appendChild(toAdd);
+
+              displayFolder('datapack/');
+
+            });
+
+          }
+
+        });
+
+      });
+
+    }
+
+    function searchType() {
+
+      if (document.getElementById('this').checked) {
+
+        
+
+      } else {
+
+      }
+
+    }
+
+    function findReplace() {
+
+      if (document.getElementById('findreplacecheck').checked) {
+
+        document.getElementById('replace').style.opacity = 1;
+
+      } else {
+
+        document.getElementById('replace').style.opacity = 0.2;
+
+      }
+
+    }
+
+    function find(type) {
+
+      if (type == "replace") {
+
+        if (document.getElementById('all').checked) {
+
+          var files = document.getElementById('files').children;
+
+          for (var i = 0; i < files.length; i++) {
+
+            if (document.getElementById('findcase').checked) {
+
+              files[i].value = files[i].value.replace(new RegExp(document.getElementById('findfind').value,'g'),document.getElementById('findreplace').value)
+
+            } else {
+
+              files[i].value = files[i].value.replace(new RegExp(document.getElementById('findfind').value,'ig'),document.getElementById('findreplace').value)
+
+            }
+
+          }
+
+        } else {
+
+          var file = document.getElementById(document.getElementById('newFile').getAttribute('dir'));
+
+          if (document.getElementById('findcase').checked) {
+
+            file.value = file.value.replace(new RegExp(document.getElementById('findfind').value,'g'),document.getElementById('findreplace').value)
+
+          } else {
+
+            file.value = file.value.replace(new RegExp(document.getElementById('findfind').value,'ig'),document.getElementById('findreplace').value)
+
+          }
+
+
+        }
+
+      } else {
+
+        if (document.getElementById('all').checked) {
+
+          document.getElementById('status').innerHTML = "<p>Found "+ document.getElementById('findfind').value +" in these files:</p>";
+          document.getElementById('status').style.display = "block";
+
+          var files = document.getElementById('files').children;
+
+          for (var i = 0; i < files.length; i++) {
+
+            if (document.getElementById('findcase').checked) {
+
+              if (files[i].value.includes(document.getElementById('findfind').value)) {
+
+                document.getElementById('status').innerHTML += "<a href=\"javascript:displayFile('"+ files[i].id +"')\" title=\""+ files[i].id +"\">"+ files[i].id.split('/').slice(-1)[0] +"</a>";
+
+              }
+
+            } else {
+
+              if (files[i].value.toLowerCase().includes(document.getElementById('findfind').value.toLowerCase())) {
+
+                document.getElementById('status').innerHTML += "<a href=\"javascript:displayFile('"+ files[i].id +"');document.getElementById('find').removeAttribute('style');\" title=\""+ files[i].id +"\">"+ files[i].id.split('/').slice(-1)[0] +"</a><br>";
+
+              }
+
+            }
+
+          }
+
+        } else {
+
+          alert('This feature is not finished yet. https://codepen.io/lonekorean/pen/gaLEMR');
+
+        }
+
+      }
+
+    }
+
+  </script>
+
+  </head>
+
+  <body onload="displayFolder('datapack/');load();">
+
+    <div id="header" style="padding-bottom:4px;border-bottom:2px solid;">
+
+      <button class="headerButton" onclick="displayFolder('datapack/')">
+        <img src="img/folder-hd.png" width="36" height="36">
+      </button>
+
+      <button class="headerButton" title="Download" onclick="downloadDatapack()">
+        <img src="img/download.png" width="36" height="36">
+      </button>
+
+      <button class="headerButton" title="Load" onclick="document.getElementById('file').click()">
+        <img src="img/download.png" width="36" height="36">
+      </button>
+
+
+      <button class="headerButton" id="newFile" title="New File" style="margin-left:20px;opacity:0.2;" onclick="newFile()">
+        <img src="img/new_file.png" width="36" height="36">
+      </button>
+
+      <button class="headerButton" id="newFolder" title="New Folder" style="opacity:0.2;" onclick="newFolder()">
+        <img src="img/new_folder.png" width="36" height="36">
+      </button>
+
+      <button class="headerButton" id="delIcon" title="Deleted files" style="opacity:0.2;">
+        <img src="img/delete.png" width="36" height="36">
+      </button>
+
+      <input type="file" id="file" accept=".zip" style="display:none;" onchange="handleFile(this.files[0])" />
+
+    </div>
+
+    <div id="dir" style="margin-top:20px;" oncontextmenu="ct(event)"></div>
+    <div id="files" oncontextmenu="cttext(event)">
+
+      <textarea id="datapack/pack.mcmeta">{
+  "pack": {
+    "pack_format": 1,
+    "description": "Example datapack"
+  }
+}</textarea>
+      <textarea id="datapack/data/example/functions/test.mcfunction">say hello</textarea>
+
+    </div>
+    <div id="deleted"></div>
+
+    <div id="contextmenu"></div>
+
+    <div id="find">
+      <div id="top">
+        <button id="exit" onclick="document.getElementById('find').removeAttribute('style');">&times;</button>
+        <p>Find and replace</p>
+      </div>
+      <form>
+        <span class="findselect">
+          <input type="radio" id="all" name="find_type" onchange="searchType()">
+          <label for="all">Find in all files</label>
+        </span>
+        <span class="findselect">
+          <input type="radio" id="this" name="find_type" onchange="searchType()">
+          <label for="this">Find in this file</label>
+        </span>
+      </form>
+      <div id="findbody">
+        <input id="findcase" type="checkbox">
+        <label for="findcase">Case sensitive</label>
+        <br>
+        <input id="findfind" placeholder="Find" class="find">
+        <br>
+        <button onclick="find('find')">Find</button>
+        <br>
+        <input id="findreplacecheck" type="checkbox" onchange="findReplace()">
+        <label for="findreplacecheck">Replace</label>
+        <br>
+        <div id="replace" style="opacity:0.2;">
+          <input id="findreplace" placeholder="Replace" class="find">
+          <br>
+          <button onclick="find('replace')">Replace</button>
+        </div>
+        <div id="status">
+        </div>
+      </div>
+    </div>
+
+  </body>
+
+</html>
