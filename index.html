@@ -464,6 +464,7 @@
             document.getElementById('all').checked = true;
             document.getElementById('this').parentNode.style.opacity = 0.2;
             document.getElementById('this').setAttribute('disabled','disabled');
+            document.getElementById('status').removeAttribute('style');
 
           } else {
 
@@ -472,6 +473,7 @@
             document.getElementById('all').checked = false;
             document.getElementById('this').parentNode.removeAttribute('style');
             document.getElementById('this').removeAttribute('disabled');
+            document.getElementById('status').removeAttribute('style');
 
           }
 
@@ -848,17 +850,6 @@
 
     }
 
-    function searchType() {
-
-      if (document.getElementById('this').checked) {
-
-        
-
-      } else {
-
-      }
-
-    }
 
     function findReplace() {
 
@@ -954,6 +945,17 @@
 
     }
 
+    function findMove(e) {
+
+      var find = document.getElementById('find');
+
+      window.getSelection().removeAllRanges();
+
+      find.style.left = findMoveStart.findx + (e.clientX - findMoveStart.mousex) + "px";
+      find.style.top = findMoveStart.findy + (e.clientY - findMoveStart.mousey) + "px";
+
+    }
+
   </script>
 
   </head>
@@ -1008,7 +1010,7 @@
     <div id="contextmenu"></div>
 
     <div id="find">
-      <div id="top">
+      <div id="top" onmousedown="findMoveStart = {findx: this.getBoundingClientRect().left, findy: this.getBoundingClientRect().top, mousex: event.clientX, mousey: event.clientY}; document.onmousemove = function(e){findMove(e)}" onmouseup="findMoveStart = null; document.onmousemove = null;">
         <button id="exit" onclick="document.getElementById('find').removeAttribute('style');">&times;</button>
         <p>Find and replace</p>
       </div>
