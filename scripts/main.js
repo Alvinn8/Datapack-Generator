@@ -2,7 +2,7 @@
 //    Variables    //
 //  -------------  //
 const VERSION = "2.1";
-const NBSP = " ";
+const NBSP = " ";
 const cl = console.log;
 let editor;
 let editingFile;
@@ -418,7 +418,7 @@ class dpFileList extends Array {
 
 const fs = new FileSystem("datapack");
 
-fs.addFile(new dpFile("", "pack.mcmeta", '{\n  "pack": {\n    "pack_format": 1,\n    "description": ""\n  }\n}', fs));
+fs.addFile(new dpFile("", "pack.mcmeta", '{\n  "pack": {\n    "pack_format": 1,\n    "description": ""\n  }\n}', fs));
 fs.addFile(new dpFile("data/default/functions/", "default.mcfunction", "execute as @a[tag=!something] run function default:test", fs));
 
 const deleted = new FileSystem("deleted");
@@ -1395,15 +1395,21 @@ function syntaxHighlight(text) {
 
     }
 
-    let resText = "";
+    let resText = '<span class="editor--linenumber">1</span>';
 
     let comment = false;
     let string = false;
     let entitySelector = false;
+    let lineNum = 2;
 
     for (let i = 0; i < text.length; i++) {
 
-       if ((comment) && (text[i] == "\n")) {
+       if (text[i] == "\n") {
+           if (i == text.length - 1) continue;
+           resText += "\n" + (string ? "</syntax>" : "") + '<span class="editor--linenumber">'+ lineNum +'</span>';
+           lineNum++;
+       }
+       else if ((comment) && (text[i] == "\n")) {
             resText += "\n</syntax>";
             comment = false;
        }
