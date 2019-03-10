@@ -1,2 +1,2 @@
-# Datapack-Generator
-A html generator for making Minecraft datapacks
+# Datapack Generator
+A HTML generator for making Minecraft datapacks
