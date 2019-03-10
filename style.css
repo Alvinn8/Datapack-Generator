@@ -40,8 +40,6 @@ body {
 }
 .nav__selected, .nav--b:not(.disabled):hover {
     background-color: #ffffff;
-    border-style: solid;
-    border-radius: 10px;
 }
 .nav--b.disabled {
     color: rgba(255, 255, 255, 0.3);
