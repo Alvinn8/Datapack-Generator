@@ -11,7 +11,7 @@ body {
     left: 0px;
     height: 30px;
     user-select: none;
-    box-shadow: 0px 5px 8px #B2B2B2;
+    box-shadow: 0px 5px 10px #C0C0C0;
 }
 .nav {
     display: inline-block;
@@ -20,8 +20,11 @@ body {
 .nav--contextmenu {
     display: none;
     position: absolute;
-    background-color: gray;
+    background-color: #C0C0C0;
     transition: opacity 250ms;
+    border-radius: 25px;
+    border-style: solid;
+    border-color: #ADADAD;
 }
 .nav--a {
     background: transparent;
@@ -30,6 +33,7 @@ body {
     border: none;
     color: black;
     outline: none;
+    font-family: "Montserrat", sans-serif;
 }
 .nav__selected, .nav--b:not(.disabled):hover {
     background-color: #ffffff;
