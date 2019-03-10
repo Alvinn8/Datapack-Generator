@@ -13,40 +13,14 @@
 
     <link rel="stylesheet" type="text/css" href="style.css"></style>
     <link rel="shortcut icon" type="image/png" href="favicon.ico"/>
-    <style id="style">
-        syntax.error {
-            background-color: rgba(255, 0, 0, 0.5);
-        }
-        syntax.comment {
-            color: #808080;
-            font-style: italic;
-        }
-        syntax.entity_selector {
-            color: #008000;
-        }
-        syntax.entity_selector_inside {
-            color: #32cd32;
-        }
-        syntax.string {
-            color: #c83232;
-        }
-        syntax.entity_selector_not {
-            color: #963232;
-        }
-        syntax.entity_selector_comma {
-            color: #000000;
-        }
-        syntax.function {
-            color: #be3c82;
-        }
-    </style>
+    <style id="style"></style>
     </head>
 
     <body>
 
         <div id="editor">
             <div id="editor--display"></div>
-            <div id="editor--input" contenteditable autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
+            <div id="editor--input" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
         </div>
 
         <div id="path"></div>
@@ -197,7 +171,7 @@
 
                 <label for="settings--style--preset">Load preset</label>
                 <select id="settings--style--preset">
-                    <option value="darktheme" selected>Default</option>
+                    <option value="default" selected>Default</option>
                     <option value="darktheme">Dark theme</option>
                 </select>
 
@@ -264,9 +238,21 @@
             </div>
             <div class="window--body">
 
-                <p class="news--subtitle">3-10-2019</p>
+                <p class="news--subtitle">2.1</p>
                 <ul>
                     <li>Temporarally removed syntax highlighting for functions as it had many issues</li>
+                </ul>
+
+                <p class="news--subtitle">2.0</p>
+                <p>The older versions were really badly coded so here's the 2.0 version!</p>
+                <ul>
+                    <li>Recoded everything!</li>
+                    <li>Added top menu bar</li>
+                    <li>Added a custom editor with syntax highlighting and autocompletion for the function command (more comming soon).</li>
+                    <li>Added fullscreen button</li>
+                    <li>Added settings</li>
+                    <li>Updated some textures</li>
+                    <li>Fixed bugs</li>
                 </ul>
 
             </div>
