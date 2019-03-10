@@ -12,47 +12,48 @@ let contextmenuOpen = {
     contextmenu : null,
     a           : null
 };
+const defaultStyle = {
+    error : [
+        ["background-color", "rgba(255, 0, 0, 0.5)"]
+    ],
+    comment : [
+        ["color", "#808080"],
+        ["font-style", "italic"]
+    ],
+    entity_selector : [
+        ["color", "#008000"]
+    ],
+    entity_selector_inside : [
+        ["color", "#32cd32"]
+    ],
+    string : [
+        ["color", "#c83232"]
+    ],
+    entity_selector_not : [
+        ["color", "#963232"]
+    ],
+    entity_selector_comma : [
+        ["color", "#000000"]
+    ],
+    function : [
+        ["color", "#be3c82"]
+    ],
+    text : [
+        ["color", "#000000"]
+    ],
+    background : [
+        ["background-color", "#ffffff"]
+    ],
+    path : [
+        ["color", "#000000"]
+    ],
+    editor : [
+        ["caret-color", "#000000"]
+    ]
+};
 const settings = {
     syntaxhighlight : true,
-    style : {
-        error : [
-            ["background-color", "rgba(255, 0, 0, 0.5)"] /* opodo - styles are defined in two places, here and in the #style, make a function that either generates the settings on load or makes the #style on load from the settings*/
-        ],
-        comment : [
-            ["color", "#808080"],
-            ["font-style", "italic"]
-        ],
-        entity_selector : [
-            ["color", "#008000"]
-        ],
-        entity_selector_inside : [
-            ["color", "#32cd32"]
-        ],
-        string : [
-            ["color", "#c83232"]
-        ],
-        entity_selector_not : [
-            ["color", "#963232"]
-        ],
-        entity_selector_comma : [
-            ["color", "#000000"]
-        ],
-        function : [
-            ["color", "#be3c82"]
-        ],
-        text : [
-            ["color", "#000000"]
-        ],
-        background : [
-            ["background-color", "#ffffff"]
-        ],
-        path : [
-            ["color", "#000000"]
-        ],
-        editor : [
-            ["caret-color", "#000000"]
-        ]
-    }
+    style : defaultStyle
 };
 
 //  -------------  //
@@ -1009,12 +1010,58 @@ $(document).ready(() => {
 
         if (val == "darktheme") {
 
-            parseStyle("syntax.error {\r\n    background-color: rgba(255, 0, 0, 0.5);\r\n}\r\nsyntax.comment {\r\n    color: #afafaf;\r\n    font-style: italic;\r\n}\r\nsyntax.entity_selector {\r\n    color: #01e801;\r\n}\r\nsyntax.entity_selector_inside {\r\n    color: #00ff3b;\r\n}\r\nsyntax.string {\r\n    color: #30ad48;\r\n}\r\nsyntax.entity_selector_not {\r\n    color: #ff5557;\r\n}\r\nsyntax.entity_selector_comma {\r\n    color: #ffffff;\r\n}\r\nsyntax.function {\r\n    color: #ff57e7;\r\n}\r\n#editor--display {\r\n    color: #ffffff;\r\n}\r\nbody {\r\n    background-color: #626361;\r\n}\r\n#path {\r\n    color: #ffffff;\r\n}");
+            settings.style = {
+                error : [
+                    ["background-color", "rgba(255, 0, 0, 0.5)"]
+                ],
+                comment : [
+                    ["color", "#afafaf"],
+                    ["font-style", "italic"]
+                ],
+                entity_selector : [
+                    ["color", "#01e801"]
+                ],
+                entity_selector_inside : [
+                    ["color", "#00ff3b"]
+                ],
+                string : [
+                    ["color", "#30ad48"]
+                ],
+                entity_selector_not : [
+                    ["color", "#ff5557"]
+                ],
+                entity_selector_comma : [
+                    ["color", "#ffffff"]
+                ],
+                function : [
+                    ["color", "#ff57e7"]
+                ],
+                text : [
+                    ["color", "#ffffff"]
+                ],
+                background : [
+                    ["background-color", "#626361"]
+                ],
+                path : [
+                    ["color", "#ffffff"]
+                ],
+                editor : [
+                    ["caret-color", "#ffffff"]
+                ]
+            };
+
+        } else if (val == "default") {
+
+            settings.style = defaultStyle;
 
         }
 
+        styleEditorUpdateAll();
+
     });
     /* qfready qfdocument.ready qfdocumentready qfdocready qfdr */
+
+    styleEditorUpdateAll();
 
     center($(".window#news").show()[0]);
     $(".window#news").css("opacity", 1);
@@ -1686,7 +1733,6 @@ function styleEditorRemove(style, i) {
 function styleEditorChange(elem) {
 
     const $elem = $(elem);
-    const $style = $("#style");
     const forstyle = $elem.parent().attr("for");
     const index = $elem.attr("index");
     const spacing = true;
@@ -1701,6 +1747,12 @@ function styleEditorChange(elem) {
 
     }
 
+    styleEditorUpdateAll();
+
+}
+function styleEditorUpdateAll() {
+
+    const spacing = true;
     let text = "";
 
     for (const i in settings.style) {
@@ -1725,7 +1777,7 @@ function styleEditorChange(elem) {
 
     }
 
-    $style.html(text);
+    $("#style").html(text);
 
 }
 function center(elem) {
