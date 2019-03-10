@@ -22,7 +22,7 @@ body {
     position: absolute;
     background-color: #C0C0C0;
     transition: opacity 250ms;
-    border-radius: 25px;
+    border-radius: 10px;
     border-style: solid;
     border-color: #ADADAD;
 }
