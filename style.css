@@ -27,6 +27,7 @@ body {
     border-radius: 10px;
     border-style: solid;
     border-color: #ADADAD;
+    border-width: 3px;
 }
 .nav--a {
     background: transparent;
