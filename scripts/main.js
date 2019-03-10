@@ -214,10 +214,10 @@ class dpFile {
 
         }
 
-        const editor = $("#editor--input");
+        const $editor = $("#editor--input");
 
         $("#editor").show();
-        editor.show();
+        $editor.show();
         $("#editor--display").show();
         $("#dir").hide();
 
@@ -232,9 +232,9 @@ class dpFile {
 
             }
 
-            text = text.replace(/ /g, NBSP); // spaces to nbsp
+            text = text.replace(/ /g, "&nbsp;"); // spaces to nbsp
 
-            editor.html(text);
+            $editor.html(text);
             updateEditorDisplay();
 
             updatePath(this.fullPath, this.fileSystem, true);
@@ -431,8 +431,10 @@ currentFs = fs;
 //  --------------------  //
 
 $(document).ready(() => {
-    $(document).on("beforeunload", e => {
+    $(window).on("beforeunload", e => {
 
+        e.preventDefault();
+        e.returnValue = "Are you sure you want to leave?";
         return "Are you sure you want to leave?";
 
     });
@@ -563,7 +565,7 @@ $(document).ready(() => {
 
         const $autocomplete = $("#editor--autocomplete");
 
-        if ($autocomplete) {
+        if ($autocomplete.length) {
 
             if (e.key == "Tab") {
 
@@ -1453,13 +1455,12 @@ function syntaxHighlight(text) {
 
        if (text[i] == "\n") {
            if (i == text.length - 1) continue;
-           resText += "\n" + (string ? "</syntax>" : "") + '<span class="editor--linenumber">'+ lineNum +'</span>';
+           resText += "\n" + ((string || comment) ? "</syntax>" : "") + '<span class="editor--linenumber">'+ lineNum +'</span>';
            lineNum++;
+           if (string) string = false;
+           if (comment) comment = false;
        }
-       else if ((comment) && (text[i] == "\n")) {
-            resText += "\n</syntax>";
-            comment = false;
-       }
+       else if (text[i] == " ") resText += "&nbsp;";
        else if (comment) resText += text[i];
        else if ((text[i] == '"') && !((text[i-1] == "\\") || (text[i-1] == undefined))) {
             if (string) {
@@ -1470,13 +1471,7 @@ function syntaxHighlight(text) {
                 resText += syntax("string",'"',true);
             }
         }
-        else if ((string) && (text[i] == "\n")) {
-            resText += "</syntax>\n"; // OPODO a new line has been opened but the string still hasn't been closed, warn the user?
-        }
-        else if (string) {
-            resText += text[i];
-            continue;
-        }
+        else if (string) resText += text[i];
         else if ((text[i] == "/") && ((text[i-1] == "\n") || (text[i-1] == undefined))) resText += syntax("error", "/");
         else if ((text[i] == "#") && ((text[i-1] == "\n") || (text[i-1] == undefined))) {
             comment = true;
