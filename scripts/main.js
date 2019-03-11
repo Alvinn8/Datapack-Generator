@@ -515,6 +515,45 @@ $(document).ready(() => {
         center($window[0]);
 
     });
+    $("#nav--project").on("click", e => {
+
+        if (currentFs == deleted) return;
+
+        const $window = $(".window#project");
+
+        $window.show();
+        center($window[0]);
+
+        $("#project--name").val(currentFs.name);
+
+        const file = currentFs.getFile("pack.mcmeta");
+
+        if (file) {
+
+            let index = file.value.indexOf('"description":') + 15;
+
+            if (file.value[index] == " ") index++;
+
+            const desc = file.value.substr(index + 1).split('"')[0];
+
+            if (desc) {
+
+                $("#project--desc--container").show();
+                $("#project--desc").val(desc);
+
+            } else {
+
+                $("#project--desc--container").hide();
+
+            }
+
+        } else {
+
+            $("#project--desc--container").hide();
+
+        }
+
+    });
     $("#editor--input").on("input", updateEditorDisplay)
     .on("keyup click focus", e => {
 
@@ -1059,6 +1098,43 @@ $(document).ready(() => {
         }
 
         styleEditorUpdateAll();
+
+    });
+    $("#project--name").on("input", e => {
+
+        if (currentFs == deleted) return;
+
+        currentFs.name = $("#project--name").val();
+
+    });
+    $("#project--pack").on("click", e => {
+
+        currentFs.getFile("pack.mcmeta").openInEditor();
+
+    });
+    $("#project--desc").on("focus", e => {
+
+        const $title = $("#project--desc--title");
+
+        $title.show();
+
+        setTimeout(() => {
+
+            $title.css("opacity", 1);
+
+        }, 1);
+
+        setTimeout(() => {
+
+            $title.css("opacity", 0);
+
+            setTimeout(() => {
+
+                $title.hide();
+
+            }, 1000);
+
+        }, 5000);
 
     });
     /* qfready qfdocument.ready qfdocumentready qfdocready qfdr */
