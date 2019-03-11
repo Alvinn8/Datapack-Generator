@@ -49,6 +49,9 @@ const defaultStyle = {
     ],
     editor : [
         ["caret-color", "#000000"]
+    ],
+    filename : [
+        ["color", "#000000"]
     ]
 };
 const settings = {
@@ -1088,6 +1091,9 @@ $(document).ready(() => {
                 ],
                 editor : [
                     ["caret-color", "#ffffff"]
+                ],
+                filename : [
+                    ["color", "#ffffff"]
                 ]
             };
 
@@ -1834,7 +1840,8 @@ function styleEditorUpdateAll() {
         if      (i == "background") query = "body";
         else if (i == "text")       query = "#editor--display";
         else if (i == "path")       query = "#path";
-        else if (i == "editor")       query = "#editor";
+        else if (i == "editor")     query = "#editor";
+        else if (i == "filename")   query = ".file--name";
 
         text += (spacing ? "        " : "") + query + " {" + (spacing ? "\n" : "");
 
@@ -1941,6 +1948,7 @@ function parseStyle(text) {
             else if (readingStyle == "#editor--display") readingStyle = "text";
             else if (readingStyle == "body")             readingStyle = "background";
             else if (readingStyle == "#path")            readingStyle = "path";
+            else if (readingStyle == ".file--name")      readingStyle = "filename";
 
             settings.style[readingStyle] = [];
 
