@@ -200,9 +200,11 @@ body {
     font-size: 17px;
     position: absolute;
     margin-top: 4px;
+    font-family: Arial, sans-serif;
 }
 .styleEditor--add {
     font-size: 20px;
+    font-family: Arial, sans-serif;
 }
 .styleEditor--remove--container {
     display: inline;
