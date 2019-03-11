@@ -148,6 +148,7 @@ body {
     margin-right: 7px;
     font-size: 30px;
     cursor: pointer;
+    font-family: Arial, sans-serif;
 }
 #contextmenu {
     background-color: rgb(246, 246, 246);
