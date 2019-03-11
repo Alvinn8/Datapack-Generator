@@ -260,6 +260,28 @@
             </div>
         </div>
 
+        <div class="window" id="project">
+            <div class="window--top">
+                <span class="window--top--title">Project</span>
+                <span class="window--top--close">&times;</span>
+            </div>
+            <div class="window--body">
+
+                <label for="project--name">Project name</label>
+                <input id="project--name" class="window--input">
+
+                <div id="project--desc--container" style="display: none;">
+
+                    <label for="project--desc">Project description</label>
+                    <input id="project--desc" class="window--input" readonly>
+
+                    <div id="project--desc--title">Edit the value in the <a href="#" id="project--pack">pack.mcmeta</a> file to change the description</div>
+
+                </div>
+
+            </div>
+        </div>
+
         <div id="contextmenu"></div>
 
         <nav id="nav">
@@ -268,6 +290,7 @@
                 <div class="nav--contextmenu">
                     <button class="nav--a nav--b" id="nav--download">Download</button>
                     <button class="nav--a nav--b" id="nav--load">Load</button>
+                    <button class="nav--a nav--b" id="nav--project">Project</button> 
                     <button class="nav--a nav--b" id="nav--settings">Settings</button>
                     <button class="nav--a nav--b" id="nav--news">News</button>
                     <button class="nav--a nav--b" id="nav--newfile">New File</button>
