@@ -52,6 +52,13 @@ const defaultStyle = {
     ],
     filename : [
         ["color", "#000000"]
+    ],
+    nav : [
+        ["background-color", "#C0C0C0"],
+        ["box-shadow", "0px 5px 10px #C0C0C0"]
+    ],
+    nav_selected : [
+        ["background-color", "#ffffff"]
     ]
 };
 const settings = {
@@ -1094,6 +1101,14 @@ $(document).ready(() => {
                 ],
                 filename : [
                     ["color", "#ffffff"]
+                ],
+                nav : [
+                    ["background-color", "#373737"],
+                    ["box-shadow", "0px 5px 10px #373737"],
+                    ["color", "white"]
+                ],
+                nav_selected : [
+                    ["background-color", "#3988ef"]
                 ]
             };
 
@@ -1837,11 +1852,13 @@ function styleEditorUpdateAll() {
         const style = settings.style[i];
 
         let query = "syntax."+ i;
-        if      (i == "background") query = "body";
-        else if (i == "text")       query = "#editor--display";
-        else if (i == "path")       query = "#path";
-        else if (i == "editor")     query = "#editor";
-        else if (i == "filename")   query = ".file--name";
+        if      (i == "background")   query = "body";
+        else if (i == "text")         query = "#editor--display";
+        else if (i == "path")         query = "#path";
+        else if (i == "editor")       query = "#editor";
+        else if (i == "filename")     query = ".file--name";
+        else if (i == "nav")          query = "#nav";
+        else if (i == "nav_selected") query = ".nav__selected, .nav--b:not(.disabled):hover";
 
         text += (spacing ? "        " : "") + query + " {" + (spacing ? "\n" : "");
 
@@ -1949,6 +1966,8 @@ function parseStyle(text) {
             else if (readingStyle == "body")             readingStyle = "background";
             else if (readingStyle == "#path")            readingStyle = "path";
             else if (readingStyle == ".file--name")      readingStyle = "filename";
+            else if (readingStyle == "#nav")             readingStyle = "nav";
+            else if (readingStyle == ".nav__selected, .nav--b:not(.disabled):hover") readingStyle = "nav_selected";
 
             settings.style[readingStyle] = [];
 
