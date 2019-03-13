@@ -1,8 +1,7 @@
 //  -------------  //
 //    Variables    //
 //  -------------  //
-const VERSION = "2.1.1";
-const NBSP = String.fromCharCode(160);
+const VERSION = "2.1.2";
 const cl = console.log;
 let editingFile;
 let currentPath;
@@ -490,7 +489,8 @@ $(document).ready(() => {
     $("#nav--settings").on("click", openSettings);
     $("#nav--load").on("click", e => {
 
-        $(".window#load").show();
+        openWindow($(".window#load"));
+
         $("#load--error").hide();
 
     });
@@ -506,20 +506,14 @@ $(document).ready(() => {
     });
     $("#nav--news").on("click", e => {
 
-        const $window = $(".window#news");
-
-        $window.show();
-        center($window[0]);
+        openWindow($(".window#news"));
 
     });
     $("#nav--project").on("click", e => {
 
         if (currentFs == deleted) return;
 
-        const $window = $(".window#project");
-
-        $window.show();
-        center($window[0]);
+        openWindow($(".window#project"));
 
         $("#project--name").val(currentFs.name);
 
@@ -527,11 +521,13 @@ $(document).ready(() => {
 
         if (file) {
 
-            let index = file.value.indexOf('"description":') + 15;
+            let desc;
 
-            if (file.value[index] == " ") index++;
+            try {
 
-            const desc = file.value.substr(index + 1).split('"')[0];
+                desc = JSON.parse(file.value).pack.description;
+
+            } catch(e) {}
 
             if (desc) {
 
@@ -564,7 +560,7 @@ $(document).ready(() => {
 
         const text = range.startContainer.textContent.substr(0, range.startOffset);
 
-        if (text.endsWith("function"+ NBSP)) {
+        if (text.endsWith("function ")) {
 
             const coords = getCaretPos();
             const $toAdd = $("<div></div>").attr("id", "editor--autocomplete");
@@ -583,9 +579,12 @@ $(document).ready(() => {
 
                 if (file.path.startsWith("data/")) {
 
-                    namespaces.push(file.path.split("/")[1]);
-                    //$toAdd.append(file.path.split("/")[1] + ":<br>");
-                    $toAdd.append($("<p></p>").text(file.path.split("/")[1]).addClass("editor--autocomplete--option").attr("index", j));
+                    const namespace = file.path.split("/")[1];
+
+                    if (namespaces.includes(namespace)) continue;
+
+                    namespaces.push(namespace);
+                    $toAdd.append($("<p></p>").text(namespace).addClass("editor--autocomplete--option").attr("index", j));
 
                     j++;
 
@@ -1040,12 +1039,6 @@ $(document).ready(() => {
 
         const val = $("#settings--style--preset").val();
 
-        /*$.get("styles/"+ val +".css", data => {
-
-            parseStyle(data);
-
-        });*/
-
         if (val == "darktheme") {
 
             settings.style = {
@@ -1106,6 +1099,7 @@ $(document).ready(() => {
         }
 
         styleEditorUpdateAll();
+        updateSettingsStyleEditor();
 
     });
     $("#project--name").on("input", e => {
@@ -1143,6 +1137,12 @@ $(document).ready(() => {
             }, 1000);
 
         }, 5000);
+
+    });
+    $("#settings--syntax").on("change", e => {
+
+        settings.syntaxhighlight = $("#settings--syntax")[0].checked;
+        if (editingFile) updateEditorDisplay();
 
     });
     /* qfready qfdocument.ready qfdocumentready qfdocready qfdr */
@@ -1519,7 +1519,7 @@ function openNavContextMenu(_contextMenu) {
 }
 function syntaxHighlight(text) {
 
-    if (!settings.syntaxhighlight) return text.replace(/\n/g, "<br>");
+    if (!settings.syntaxhighlight) return text;
 
     function syntax(syn, text, noEnd) {
 
@@ -1538,16 +1538,14 @@ function syntaxHighlight(text) {
     for (let i = 0; i < text.length; i++) {
 
        if (text[i] == "\n") {
-           if (i == text.length - 1) continue;
+           //if (i == text.length - 1) continue;
            resText += "\n" + ((string || comment) ? "</syntax>" : "") + '<span class="editor--linenumber">'+ lineNum +'</span>';
            lineNum++;
            if (string) string = false;
            if (comment) comment = false;
        }
-       //else if (text[i] == " ") resText += "&nbsp;";
-       else if (text[i] == " ") resText += " ";
        else if (comment) resText += text[i];
-       else if ((text[i] == '"') && !((text[i-1] == "\\") || (text[i-1] == undefined))) {
+       else if ((text[i] == '"') && !(text[i-1] == "\\")) {
             if (string) {
                 string = false;
                 resText += '"</syntax>';
@@ -1586,9 +1584,9 @@ function syntaxHighlight(text) {
 
             /* TODO(bug)
             let txt = "function";
-            const after = text.substr(i+14).split("\n")[0].split(" ")[0].split(NBSP)[0].split("&nbsp;")[0];
+            const after = text.substr(i+14).split("\n")[0].split(" ")[0];
 
-            if (after.includes(":")) txt += "&nbsp;"+ after;
+            if (after.includes(":")) txt += " "+ after;
 
             resText += syntax("function", txt);
             i += txt.length - 1;
@@ -1598,8 +1596,6 @@ function syntaxHighlight(text) {
         else resText += text[i];
 
     }
-
-    resText = resText.replace(/\n/g, "<br>");
 
     return resText;
 
@@ -1621,7 +1617,8 @@ function updateEditorDisplay() {
 
     });
 
-    const val = input.html().replace(/<div>/g,"").replace(/<br>/g,"").replace(/<\/div>/g,"\n");
+    //const val = input.html().replace(/<div>/g,"").replace(/<br>/g,"").replace(/<\/div>/g,"\n");
+    const val = getEditorText();
 
     const syntax = syntaxHighlight(val);
 
@@ -1705,11 +1702,7 @@ function closeContextmenu() {
 }
 function newFile() {
     
-    const $window = $(".window#newFile");
-
-    $window.show().css("zIndex", 11);
-
-    center($window[0]);
+    openWindow($(".window#newFile"));
 
     $("#newFile--name").val("");
     $("#newFile--path").val(currentPath);
@@ -1718,11 +1711,7 @@ function newFile() {
 }
 function newFolder() {
     
-    const $window = $(".window#newFolder");
-
-    $window.show().css("zIndex", 11);
-
-    center($window[0]);
+    openWindow($(".window#newFolder"));
 
     $("#newFolder--name").val("");
     $("#newFolder--path").val(currentPath);
@@ -1731,11 +1720,7 @@ function newFolder() {
 }
 function rename() {
 
-    const $window = $(".window#rename");
-    
-    $window.show().css("zIndex", 11);
-
-    center($window[0]);
+    openWindow($(".window#rename"));
 
     $("#rename--name").val("");
     $("#rename--path").val(currentPath);
@@ -1746,11 +1731,7 @@ function rename() {
 }
 function openSettings() {
 
-    const $window = $(".window#settings");
-    
-    $window.show().css("zIndex", 11);
-
-    center($window[0]);
+    openWindow($(".window#settings"));
 
     $("#settings--syntax")[0].checked = settings.syntaxhighlight;
 
@@ -1873,10 +1854,8 @@ function center(elem) {
 }
 function openFind() {
 
-    const $window = $(".window#find");
+    openWindow($(".window#find"));
 
-    $window.show();
-    center($window[0]);
     $("#find--error").hide().html("");
 
     if (editingFile) $("#find--this")[0].checked = true;
@@ -2015,5 +1994,12 @@ function getEditorText() {
     });
 
     return text;
+
+}
+function openWindow($window) {
+
+    $window.show().css("opacity", 1);    
+
+    center($window[0]);
 
 }
