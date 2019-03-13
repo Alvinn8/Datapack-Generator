@@ -248,6 +248,7 @@ html {
     color: white;
     position: fixed;
     cursor: pointer;
+    border: 1px solid #ddd;
 }
 .editor--autocomplete--option {
     margin: 0px;
@@ -256,7 +257,7 @@ html {
     font-family: "Source Code Pro", sans-serif;
 }
 .editor--autocomplete--option.selected {
-    background-color: #ffffff;
+    background-color: #3988ef;
 }
 .editor--autocomplete--option:not(.selected):hover {
     background-color: #b3b3b3;
