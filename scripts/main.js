@@ -1,10 +1,9 @@
 //  -------------  //
 //    Variables    //
 //  -------------  //
-const VERSION = "2.1";
-const NBSP = " ";
+const VERSION = "2.1.1";
+const NBSP = String.fromCharCode(160);
 const cl = console.log;
-let editor;
 let editingFile;
 let currentPath;
 let autoCompleteIndex = 0;
@@ -233,19 +232,7 @@ class dpFile {
 
         if (this.type == "text") {
 
-            const split = this.value.split("\n");
-            let text = "";
-
-            for (let i = 0; i < split.length; i++) {
-
-                text += "<div>" + (split[i].length ? split[i] : "<br>") + "</div>";
-
-            }
-
-            text = text.replace(/ /g, "&nbsp;"); // spaces to nbsp
-
-            $editor.html(text);
-            updateEditorDisplay();
+            setEditorText(this.value);
 
             updatePath(this.fullPath, this.fileSystem, true);
 
@@ -277,7 +264,7 @@ class dpFile {
 
         const editor = $("#editor--input");
 
-        this.value = editor[0].innerText.replace(/\n\n/g, "\n");
+        this.value = getEditorText();
 
     }
 
@@ -1557,7 +1544,8 @@ function syntaxHighlight(text) {
            if (string) string = false;
            if (comment) comment = false;
        }
-       else if (text[i] == " ") resText += "&nbsp;";
+       //else if (text[i] == " ") resText += "&nbsp;";
+       else if (text[i] == " ") resText += " ";
        else if (comment) resText += text[i];
        else if ((text[i] == '"') && !((text[i-1] == "\\") || (text[i-1] == undefined))) {
             if (string) {
@@ -1995,5 +1983,37 @@ function parseStyle(text) {
         }
 
     }
+
+}
+function setEditorText(text) {
+
+    const $editor = $("#editor--input");
+    const lines = text.split("\n");
+
+    $editor.html("");
+
+    for (let i = 0; i < lines.length; i++) {
+
+        if (lines[i]) $editor.append($("<div></div>").text(lines[i]));
+        else $editor.append($("<div></div>").html("<br>"));
+
+    }
+
+    updateEditorDisplay();
+
+}
+function getEditorText() {
+
+    const $editor = $("#editor--input");
+    const $children = $editor.children();
+    let text = "";
+
+    $children.each(function(index, elem) {
+
+        text += (elem.innerText != "\n" ? elem.innerText : "") + (index == $children.length - 1 ? "" : "\n");
+
+    });
+
+    return text;
 
 }
