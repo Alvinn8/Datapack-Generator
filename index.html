@@ -2,28 +2,29 @@
 <html>
     <head>
      
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <!--<script src="lib/jquery.min.js"></script>-->
-    <script src="lib/jszip.min.js"></script>
-    <script src="lib/FileSaver.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!--<script src="lib/jquery.min.js"></script>-->
+        <script src="lib/jszip.min.js"></script>
+        <script src="lib/FileSaver.js"></script>
         
-    <script src="scripts/main.js"></script>
+        <script src="scripts/main.js"></script>
 
-    <title>Datapack Generator</title>
+        <title>Datapack Generator</title>
 
-    <link rel="stylesheet" type="text/css" href="style.css"></style>
-    <link rel="shortcut icon" type="image/png" href="favicon.ico"/>
-    <style id="style"></style>
+        <link rel="stylesheet" type="text/css" href="style.css"></style>
+        <link rel="shortcut icon" type="image/png" href="favicon.ico"/>
+        <style id="style"></style>
     </head>
 
     <body>
+
+        <div id="path"></div>
 
         <div id="editor">
             <div id="editor--display"></div>
             <div id="editor--input" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
         </div>
 
-        <div id="path"></div>
         <div id="dir"></div>
 
         <div class="window" id="newFile">
@@ -247,13 +248,24 @@
             </div>
             <div class="window--body">
 
-                <a id="news--changelog" href="changelog.html" target="_blank">View full changelog</a>
+                <a id="news--changelog" href="changelog.html">View full changelog</a>
 
                 <p class="news--subtitle">2.1</p>
-                <p>New styles, dark theme and other stuff!</p>
+                <ul>
+                    <li>Temporarally removed syntax highlighting for functions as it had many issues</li>
+                </ul>
 
                 <p class="news--subtitle">2.0</p>
-                <p>The older versions were really badly coded so here's the 2.0 version with loads of new features!</p>
+                <p>The older versions were really badly coded so here's the 2.0 version!</p>
+                <ul>
+                    <li>Recoded everything!</li>
+                    <li>Added top menu bar</li>
+                    <li>Added a custom editor with syntax highlighting and autocompletion for the function command (more comming soon).</li>
+                    <li>Added fullscreen button</li>
+                    <li>Added settings</li>
+                    <li>Updated some textures</li>
+                    <li>Fixed bugs</li>
+                </ul>
 
             </div>
         </div>
@@ -273,7 +285,7 @@
                     <label for="project--desc">Project description</label>
                     <input id="project--desc" class="window--input" readonly>
 
-                    <div id="project--desc--title">Edit the value in the <a href="javascript:void(0)" id="project--pack" target="_blank">pack.mcmeta</a> file to change the description</div>
+                    <div id="project--desc--title">Edit the value in the <a href="#" id="project--pack">pack.mcmeta</a> file to change the description</div>
 
                 </div>
 
@@ -309,7 +321,7 @@
                     <button class="nav--a nav--b" id="nav--resetdir">Home directory</button>
                 </div>
             </div>
-            <a id="version" href="changelog.html" target="_blank"></a>
+            <a id="version" href="changelog.html"></a>
         </nav>
     </body>
 </html>
