@@ -1,7 +1,7 @@
 //  -------------  //
 //    Variables    //
 //  -------------  //
-const VERSION = "2.1.2";
+const VERSION = "2.1.3";
 const cl = console.log;
 let editingFile;
 let currentPath;
@@ -63,6 +63,7 @@ const settings = {
     syntaxhighlight : true,
     style : defaultStyle
 };
+const history = [];
 
 //  -------------  //
 //     Classes     //
@@ -222,6 +223,8 @@ class dpFile {
 
         }
 
+        history.push(new HistoryEntry(this));
+
         const $editor = $("#editor--input");
 
         $("#editor").show();
@@ -321,7 +324,7 @@ class dpFileList extends Array {
     // Displays the files on the screen (#dir)
     display() {
 
-        if (this.path == undefined) throw new Error("Can not display a folder that isn't a directory");
+        if (this.path == undefined) throw new Error("Can not display a dpFileList that isn't a directory");
 
         cl(`Displaying directory ${this.path}`);
 
@@ -331,6 +334,8 @@ class dpFileList extends Array {
             editingFile = null;
 
         }
+
+        history.push(new HistoryEntry(this));
 
         currentFs = this.fileSystem;
 
@@ -408,6 +413,40 @@ class dpFileList extends Array {
         }
 
         updatePath(this.path, this.fileSystem);
+
+    }
+
+}
+
+class HistoryEntry {
+
+    constructor(entry) {
+
+        if (entry instanceof dpFile) {
+
+            this.isFile = true;
+            this.file = entry;
+
+        } else {
+
+            this.isFile = false;
+            this.fileList = entry;
+
+        }
+
+    }
+
+    open() {
+
+        if (this.isFile) {
+
+            this.file.openInEditor();
+
+        } else {
+
+            this.fileList.fileSystem.getDirectory(this.fileList.path).display();
+
+        }
 
     }
 
@@ -584,7 +623,13 @@ $(document).ready(() => {
                     if (namespaces.includes(namespace)) continue;
 
                     namespaces.push(namespace);
-                    $toAdd.append($("<p></p>").text(namespace).addClass("editor--autocomplete--option").attr("index", j));
+                    $toAdd.append($("<p></p>").text(namespace).addClass("editor--autocomplete--option").attr("index", j).on("click", e => {
+
+                        e.preventDefault();
+                        autoComplete(namespace);
+                        $("#editor--autocomplete").remove();  // todo
+
+                    }));
 
                     j++;
 
@@ -1143,6 +1188,11 @@ $(document).ready(() => {
 
         settings.syntaxhighlight = $("#settings--syntax")[0].checked;
         if (editingFile) updateEditorDisplay();
+
+    });
+    $("#back").on("click", e => {
+
+        history.back();
 
     });
     /* qfready qfdocument.ready qfdocumentready qfdocready qfdr */
@@ -2001,5 +2051,15 @@ function openWindow($window) {
     $window.show().css("opacity", 1);    
 
     center($window[0]);
+
+}
+history.back = function() {
+
+    if (history.length < 2) return;
+
+    history.pop();
+    const a = history.pop();
+
+    a.open();
 
 }
