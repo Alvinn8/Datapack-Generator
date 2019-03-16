@@ -3,22 +3,25 @@
     <head>
      
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <!--<script src="lib/jquery.min.js"></script>-->
-        <script src="lib/jszip.min.js"></script>
-        <script src="lib/FileSaver.js"></script>
+        <!--<script src="js/lib/jquery.min.js"></script>-->
+        <script src="js/lib/jszip.min.js"></script>
+        <script src="js/lib/FileSaver.js"></script>
         
-        <script src="scripts/main.js"></script>
+        <script src="js/main.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/main.css"></style>
 
         <title>Datapack Generator</title>
 
-        <link rel="stylesheet" type="text/css" href="style.css"></style>
         <link rel="shortcut icon" type="image/png" href="favicon.ico"/>
         <style id="style"></style>
     </head>
 
     <body>
 
-        <div id="path"></div>
+        <div id="path--container">
+            <button id="back">&lt;</button>
+            <span id="path"></span>
+        </div>
 
         <div id="editor">
             <div id="editor--display"></div>
@@ -248,7 +251,7 @@
             </div>
             <div class="window--body">
 
-                <a id="news--changelog" href="changelog.html" target="_blank">View full changelog</a>
+                <a id="news--changelog" href="changelog" target="_blank">View full changelog</a>
 
                 <p class="news--subtitle">2.1</p>
                 <p>New styles, dark theme and other stuff!</p>
@@ -310,7 +313,7 @@
                     <button class="nav--a nav--b" id="nav--resetdir">Home directory</button>
                 </div>
             </div>
-            <a id="version" href="changelog.html" target="_blank"></a>
+            <a id="version" href="changelog" target="_blank"></a>
         </nav>
     </body>
 </html>
