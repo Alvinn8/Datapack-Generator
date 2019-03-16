@@ -92,7 +92,7 @@ html {
     outline: 0;
     width: 100px;
 }
-#path {
+#path--container {
     font-family: "Montserrat", sans-serif;
     padding: 20px 0px;
 }
@@ -295,4 +295,8 @@ html {
     display: none;
     opacity: 0;
     transition: opacity 1s;
+}
+#back {
+    font-size: large;
+    border: 1px solid #aaa;
 }
