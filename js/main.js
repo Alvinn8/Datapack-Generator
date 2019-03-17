@@ -354,7 +354,7 @@ class dpFileList extends Array {
             let folderName;
 
             let img = "img/unknown_file.png";
-            if (file.getFileExtension() == "mcfunction") img = "img/mcfunction_file.png";
+            //if (file.getFileExtension() == "mcfunction") img = "img/mcfunction_file.png";
             if (hasSub) {
 
                 folderName = file.path.substr(this.path.length).split("/")[0];
